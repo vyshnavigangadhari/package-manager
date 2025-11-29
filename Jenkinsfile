@@ -4,20 +4,26 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/vyshnavigangadhari/package-manager.git', branch: 'main'
+                // Code is already checked out by Declarative: Checkout SCM
+                echo 'Using code from package-manager Git repository'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat 'pip install -r requirements.txt'
+                bat '''
+                python --version
+                python -m pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Build and Test') {
             steps {
-                bat 'python -m py_compile app.py'
-                bat 'python app.py'
+                bat '''
+                python -m py_compile app.py
+                python app.py
+                '''
             }
         }
 
@@ -25,6 +31,15 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: 'app.py', fingerprint: true
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check console output.'
         }
     }
 }
